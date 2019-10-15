@@ -1,5 +1,5 @@
 '''
-G_Measures v0.7
+G_Measures v.0.8
 The "Geometric Measures" script that was developed to carry out geometric analysis on protein structures.
 
 Contributors:
@@ -32,7 +32,7 @@ import numpy as np
 TEMP_PATH = tempfile.mkdtemp()
 SHAM_PATH = TEMP_PATH+"/g_sham2.xvg"
 TRAJ_PATH = TEMP_PATH+"/trajectory.pdb"
-_version_ = str("v0.7")
+_version_ = str("v.0.8")
 
 def modevectors(first_obj_frame, last_obj_frame, first_state=1, last_state=1, outname="modevectors", head=1.0, tail=0.3, head_length=1.5, headrgb="1.0,1.0,1.0", tailrgb="1.0,1.0,1.0", cutoff=4.0, skip=0, cut=0.5, atom="CA", stat="show", factor=1.0, notail=0):
     """
@@ -319,7 +319,7 @@ def __init_plugin__(app=None):
     Add an entry to the PyMOL "Plugin" menu
     '''
     from pymol.plugins import addmenuitemqt
-    addmenuitemqt('G_Measure v0.7', run_plugin_gui)
+    addmenuitemqt('G_Measure v.0.8', run_plugin_gui)
 
 
 # global reference to avoid garbage collection of our dialog
@@ -375,7 +375,40 @@ def make_dialog():
     form.progressBar.setProperty("value", 0)
     
     # callback for the "Ray" button
-    
+    stored.axe_frame = []
+    stored.axe1_column_name = []
+    stored.axe1_data= []
+    stored.axe2_column_name = []
+    stored.axe2_data= []
+    def openCSVfileAxe1():
+        options = QtWidgets.QFileDialog.Options()
+        options |= QtWidgets.QFileDialog.DontUseNativeDialog
+        fileName, _ = QtWidgets.QFileDialog.getOpenFileName(None,"Select a CSV file.", "","CSV (*.csv)", options=options)
+        if fileName:
+            form.le_axe1.setText(fileName)
+            df = pd.read_csv(fileName)
+            for itens in df.columns.tolist():
+                stored.axe1_column_name.append(itens)
+            for itens in df.iloc[:,-1]:
+                stored.axe1_data.append(itens)
+            for itens in df.iloc[:,-2]:
+                stored.axe_frame.append(itens)
+        else:
+            return None
+
+    def openCSVfileAxe2():
+        options = QtWidgets.QFileDialog.Options()
+        options |= QtWidgets.QFileDialog.DontUseNativeDialog
+        fileName, _ = QtWidgets.QFileDialog.getOpenFileName(None,"Select a CSV file.", "","CSV (*.csv)", options=options)
+        if fileName:
+            form.le_axe2.setText(fileName)
+            df = pd.read_csv(fileName)
+            for itens in df.columns.tolist():
+                stored.axe2_column_name.append(itens)
+            for itens in df.iloc[:,-1]:
+                stored.axe2_data.append(itens)            
+        else:
+            return None
 
     def setupProcess():        
         # Run the process with a given command
@@ -416,17 +449,28 @@ def make_dialog():
                 txt_values.append([x_value, y_value, letter_to_value[data_value[x_index]]])
             for x, y, z in txt_values:
                 data.append ([float(x),float(y),float(z)])
-        labels = ['RMSD (nm)', 'RG (nm)', 'Gb_E (kj/mol)']
+        if len(stored.axe1_data) != 0 and len(stored.axe2_data) != 0:
+            labels = [str(stored.axe1_column_name[-1]), str(stored.axe2_column_name[-1]), 'Gb_E (kj/mol)']
+        else:
+            labels = ['RMSD (nm)', 'RG (nm)', 'Gb_E (kj/mol)']
         df = pd.DataFrame.from_records(data, columns=labels)
         os.chdir(TEMP_PATH)
-        df.to_csv('dataFEL.csv')                   
+        df.to_csv('dataFEL.csv')   
+
     def clear():
-        cmd.delete('not md')
+        try:
+            cmd.delete('not md')
+        except:
+            pass
         form.cb_res1.clear()
         form.cb_res2.clear()
         form.cb_res3.clear()
         form.cb_res4.clear()
         form.cb_chain.clear()
+        stored.axe1_data.clear()
+        stored.axe2_data.clear()
+        form.le_axe1.clear()
+        form.le_axe2.clear()
         form.bt_clear.setVisible(False)
         form.bt_getcsv.setVisible(False)
         form.bt_plot.setVisible(False)
@@ -440,7 +484,19 @@ def make_dialog():
         form.label_pca.setVisible(False)
         form.cb_selplot.setVisible(False)
         form.label_plot.setVisible(False)
-        cmd.color('green', 'md')
+        form.bt_browse_axe1.setEnabled(True)
+        form.bt_browse_axe2.setEnabled(True)
+        form.le_axe1.setEnabled(True)
+        form.le_axe2.setEnabled(True)
+        stored.axe_frame = []
+        stored.axe1_column_name = []
+        stored.axe1_data= []
+        stored.axe2_column_name = []
+        stored.axe2_data= []
+        try:
+            cmd.color('green', 'md')
+        except:
+            pass
         try:
             shutil.rmtree(TRAJ_PATH)
         except:
@@ -536,7 +592,7 @@ def make_dialog():
             os.chdir(TEMP_PATH)
             g_data =  pd.DataFrame()
             g_data['Frame'] = dataFrame
-            g_data['RMSD'] = dataRMSD
+            g_data['RMSD (nm)'] = dataRMSD
             g_data.to_csv('dataRMSD.csv')
             form.bt_run.setVisible(False)
             form.bt_unset.setVisible(False)
@@ -560,7 +616,7 @@ def make_dialog():
             os.chdir(TEMP_PATH)
             g_data =  pd.DataFrame()
             g_data['Frame'] = dataFrame
-            g_data['RG'] = dataRG
+            g_data['RG (nm)'] = dataRG
             g_data.to_csv('dataRG.csv')
             form.bt_run.setVisible(False)
             form.bt_unset.setVisible(False)
@@ -570,32 +626,51 @@ def make_dialog():
             form.plain_status.setPlainText('Done.')
         elif form.cb_tool.currentText() == "PDF":
             form.plain_status.setPlainText('Running PDF, please wait.')
-            count = 0
-            form.progressBar.setMaximum(cmd.count_states('md'))
-            dataFrame =[]
-            dataRMSD = []
-            dataRG = []
-            t = mdtraj.load(TRAJ_PATH)
-            rg = mdtraj.compute_rg(t)
-            rmsd = mdtraj.rmsd(t, t, 1)
-            for frame in range(cmd.count_states('md')):
-                dataFrame.append(frame)
-                dataRMSD.append(rmsd[frame])
-                dataRG.append(rg[frame])
-                count += 1
-                form.progressBar.setValue(count)
-            os.chdir(TEMP_PATH)
-            g_data =  pd.DataFrame()
-            g_data['Frame'] = dataFrame
-            g_data['RMSD (nm)'] = dataRMSD
-            g_data['RG (nm)'] = dataRG
-            g_data.to_csv('dataPDF.csv')
-            form.bt_run.setVisible(False)
-            form.bt_unset.setVisible(False)
-            form.bt_plot.setVisible(True)
-            form.bt_getcsv.setVisible(True)
-            form.bt_clear.setVisible(True)
-            form.plain_status.setPlainText('Done.')
+            if len(stored.axe1_data) != 0 and len(stored.axe2_data) != 0:
+                if len(stored.axe1_data) == len(stored.axe2_data):
+                    form.progressBar.setMaximum(100)
+                    form.progressBar.setValue(100)
+                    os.chdir(TEMP_PATH)
+                    g_data =  pd.DataFrame()
+                    g_data['Frame'] = stored.axe_frame
+                    g_data[str(stored.axe1_column_name[-1])] = stored.axe1_data
+                    g_data[str(stored.axe2_column_name[-1])] = stored.axe2_data
+                    g_data.to_csv('dataPDF.csv')
+                    form.bt_run.setVisible(False)
+                    form.bt_unset.setVisible(False)
+                    form.bt_plot.setVisible(True)
+                    form.bt_getcsv.setVisible(True)
+                    form.bt_clear.setVisible(True)
+                    form.plain_status.setPlainText('Done.')
+                else:
+                    showdialog('Note','The number of frames must be equal for both CSV files.')
+            else:
+                count = 0
+                form.progressBar.setMaximum(cmd.count_states('md'))
+                dataFrame =[]
+                dataRMSD = []
+                dataRG = []
+                t = mdtraj.load(TRAJ_PATH)
+                rg = mdtraj.compute_rg(t)
+                rmsd = mdtraj.rmsd(t, t, 1)
+                for frame in range(cmd.count_states('md')):
+                    dataFrame.append(frame)
+                    dataRMSD.append(rmsd[frame])
+                    dataRG.append(rg[frame])
+                    count += 1
+                    form.progressBar.setValue(count)
+                os.chdir(TEMP_PATH)
+                g_data =  pd.DataFrame()
+                g_data['Frame'] = dataFrame
+                g_data['RMSD (nm)'] = dataRMSD
+                g_data['RG (nm)'] = dataRG
+                g_data.to_csv('dataPDF.csv')
+                form.bt_run.setVisible(False)
+                form.bt_unset.setVisible(False)
+                form.bt_plot.setVisible(True)
+                form.bt_getcsv.setVisible(True)
+                form.bt_clear.setVisible(True)
+                form.plain_status.setPlainText('Done.')
         elif form.cb_tool.currentText() == "PCA":
             form.plain_status.setPlainText('Running PCA, please wait.')
             dataPC1 =[]
@@ -852,40 +927,67 @@ def make_dialog():
         elif form.cb_tool.currentText() == "FEL":
             if gromacs_flag('mdrun') or gromacs_flag('gmx'):
                 form.plain_status.setPlainText('Running FEL, please wait.')
-                count = 0
-                form.progressBar.setMaximum(cmd.count_states('md'))
-                dataFrame =[]
-                dataRMSD = []
-                dataRG = []
-                t = mdtraj.load(TRAJ_PATH)
-                rg = mdtraj.compute_rg(t)
-                rmsd = mdtraj.rmsd(t, t, 1)
-                for frame in range(cmd.count_states('md')):
-                    dataFrame.append(frame)
-                    dataRMSD.append(rmsd[frame])
-                    dataRG.append(rg[frame])
-                    count += 1
-                    form.progressBar.setValue(count)                      
-                os.chdir(TEMP_PATH)
-                g_data =  pd.DataFrame()
-                g_data['a'] = dataFrame
-                g_data['b'] = dataRMSD
-                g_data['c'] = dataRG
-                g_data.to_csv('g_sham2.xvg', sep='\t', index=False,  header=0)
-                with open('g_sham2.xvg', 'r') as fin:
-                    data = fin.read().splitlines(True)
-                with open('g_sham2.xvg', 'w') as fout:
-                    fout.writelines(data[1:])
-                setupProcess()
-                dataFEL()
-                form.bt_run.setVisible(False)
-                form.bt_unset.setVisible(False)
-                form.bt_plot.setVisible(True)
-                form.bt_getcsv.setVisible(True)
-                form.bt_clear.setVisible(True)
-                form.cb_selplot.setVisible(True)
-                form.label_plot.setVisible(True)
-                form.plain_status.setPlainText('Done.')                  
+                if len(stored.axe1_data) != 0 and len(stored.axe2_data) != 0:
+                    if len(stored.axe1_data) == len(stored.axe2_data):
+                        os.chdir(TEMP_PATH)
+                        g_data =  pd.DataFrame()
+                        g_data['a'] = stored.axe_frame
+                        g_data['b'] = stored.axe1_data
+                        g_data['c'] = stored.axe2_data
+                        g_data.to_csv('g_sham2.xvg', sep='\t', index=False,  header=0)
+                        with open('g_sham2.xvg', 'r') as fin:
+                            data = fin.read().splitlines(True)
+                        with open('g_sham2.xvg', 'w') as fout:
+                            fout.writelines(data[1:])
+                        setupProcess()
+                        dataFEL()
+                        form.bt_run.setVisible(False)
+                        form.bt_unset.setVisible(False)
+                        form.bt_plot.setVisible(True)
+                        form.bt_getcsv.setVisible(True)
+                        form.bt_clear.setVisible(True)
+                        form.cb_selplot.setVisible(True)
+                        form.label_plot.setVisible(True)
+                        form.progressBar.setMaximum(100)
+                        form.progressBar.setValue(100)
+                        form.plain_status.setPlainText('Done.')
+                    else:
+                        showdialog('Note','The number of frames must be equal for both CSV files.')
+                else:
+                    count = 0
+                    form.progressBar.setMaximum(cmd.count_states('md'))
+                    dataFrame =[]
+                    dataRMSD = []
+                    dataRG = []
+                    t = mdtraj.load(TRAJ_PATH)
+                    rg = mdtraj.compute_rg(t)
+                    rmsd = mdtraj.rmsd(t, t, 1)
+                    for frame in range(cmd.count_states('md')):
+                        dataFrame.append(frame)
+                        dataRMSD.append(rmsd[frame])
+                        dataRG.append(rg[frame])
+                        count += 1
+                        form.progressBar.setValue(count)                      
+                    os.chdir(TEMP_PATH)
+                    g_data =  pd.DataFrame()
+                    g_data['a'] = dataFrame
+                    g_data['b'] = dataRMSD
+                    g_data['c'] = dataRG
+                    g_data.to_csv('g_sham2.xvg', sep='\t', index=False,  header=0)
+                    with open('g_sham2.xvg', 'r') as fin:
+                        data = fin.read().splitlines(True)
+                    with open('g_sham2.xvg', 'w') as fout:
+                        fout.writelines(data[1:])
+                    setupProcess()
+                    dataFEL()
+                    form.bt_run.setVisible(False)
+                    form.bt_unset.setVisible(False)
+                    form.bt_plot.setVisible(True)
+                    form.bt_getcsv.setVisible(True)
+                    form.bt_clear.setVisible(True)
+                    form.cb_selplot.setVisible(True)
+                    form.label_plot.setVisible(True)
+                    form.plain_status.setPlainText('Done.')                  
             else:
                 showdialog('Notice', 'GROMACS program must be intalled')
                 clear()
@@ -997,6 +1099,12 @@ def make_dialog():
             form.cb_res4.setVisible(False)
             form.cb_lig.setVisible(False)
             form.label_lig.setVisible(False)
+            form.label_axe1.setVisible(True)
+            form.label_axe2.setVisible(True)
+            form.le_axe1.setVisible(True)
+            form.le_axe2.setVisible(True)
+            form.bt_browse_axe1.setVisible(True)
+            form.bt_browse_axe2.setVisible(True)
             form.plain_status.setPlainText('The Functional Density Function is calculated using different values ​​of mainchain dihedral angles from the considered residue, the mainchain conformation of the equivalent residue between frames. Click on Load.')
 
         elif form.cb_tool.currentText() == "RG":
@@ -1014,6 +1122,12 @@ def make_dialog():
             form.cb_res4.setVisible(False)
             form.cb_lig.setVisible(False)
             form.label_lig.setVisible(False)
+            form.label_axe1.setVisible(False)
+            form.label_axe2.setVisible(False)
+            form.le_axe1.setVisible(False)
+            form.le_axe2.setVisible(False)
+            form.bt_browse_axe1.setVisible(False)
+            form.bt_browse_axe2.setVisible(False)
             form.plain_status.setPlainText('Computes the radius of gyration of the protein in a function of frames. Click on Load.')
 
         elif form.cb_tool.currentText() == "DSSP":
@@ -1031,6 +1145,12 @@ def make_dialog():
             form.cb_res4.setVisible(False)
             form.cb_lig.setVisible(False)
             form.label_lig.setVisible(False)
+            form.label_axe1.setVisible(False)
+            form.label_axe2.setVisible(False)
+            form.le_axe1.setVisible(False)
+            form.le_axe2.setVisible(False)
+            form.bt_browse_axe1.setVisible(False)
+            form.bt_browse_axe2.setVisible(False)
             form.plain_status.setPlainText('Compute Dictionary of protein secondary structure (DSSP) secondary structure in a function of frames. Click on Load.')
 
         elif form.cb_tool.currentText() == "Ramachandran map":
@@ -1048,6 +1168,12 @@ def make_dialog():
             form.cb_res4.setVisible(False)
             form.cb_lig.setVisible(False)
             form.label_lig.setVisible(False)
+            form.label_axe1.setVisible(False)
+            form.label_axe2.setVisible(False)
+            form.le_axe1.setVisible(False)
+            form.le_axe2.setVisible(False)
+            form.bt_browse_axe1.setVisible(False)
+            form.bt_browse_axe2.setVisible(False)
             form.plain_status.setPlainText('The Ramachandran plot is the 2d plot of the ϕ-ψ torsion angles of the protein backbone. It provides a simple view of the conformation of a selected frame of protein . Click on Load.')
 
         elif form. cb_tool.currentText() == "RMSD":
@@ -1065,6 +1191,12 @@ def make_dialog():
             form.cb_res4.setVisible(False)
             form.cb_lig.setVisible(False)
             form.label_lig.setVisible(False)
+            form.label_axe1.setVisible(False)
+            form.label_axe2.setVisible(False)
+            form.le_axe1.setVisible(False)
+            form.le_axe2.setVisible(False)
+            form.bt_browse_axe1.setVisible(False)
+            form.bt_browse_axe2.setVisible(False)
             form.plain_status.setPlainText('Compares two protein structures frames (first frame the first frame with the consecutive frames) by computing the root mean square deviation (RMSD). Click on Load.')
 
         elif form. cb_tool.currentText() == "RMSF":
@@ -1082,6 +1214,12 @@ def make_dialog():
             form.cb_res4.setVisible(False)
             form.cb_lig.setVisible(False)
             form.label_lig.setVisible(False)
+            form.label_axe1.setVisible(False)
+            form.label_axe2.setVisible(False)
+            form.le_axe1.setVisible(False)
+            form.le_axe2.setVisible(False)
+            form.bt_browse_axe1.setVisible(False)
+            form.bt_browse_axe2.setVisible(False)
             form.plain_status.setPlainText('RMSF stands for root mean square fluctuation. This is a numerical measurement similar to RMSD, but instead of indicating positional differences between entire structures over time, RMSF is a calculation of individual residue flexibility, or how much a particular residue moves (fluctuates) during a simulation. Click on Load.')
 
         elif form.cb_tool.currentText() == "Pincer angle":
@@ -1099,6 +1237,12 @@ def make_dialog():
             form.cb_res4.setVisible(False)
             form.cb_lig.setVisible(False)
             form.label_lig.setVisible(False)
+            form.label_axe1.setVisible(False)
+            form.label_axe2.setVisible(False)
+            form.le_axe1.setVisible(False)
+            form.le_axe2.setVisible(False)
+            form.bt_browse_axe1.setVisible(False)
+            form.bt_browse_axe2.setVisible(False)
             form.plain_status.setPlainText('Measure the residue carbon alpha pincer angle. Click on Load.')
 
         elif form.cb_tool.currentText() == "Triangle area":
@@ -1116,6 +1260,12 @@ def make_dialog():
             form.cb_res4.setVisible(False)
             form.cb_lig.setVisible(False)
             form.label_lig.setVisible(False)
+            form.label_axe1.setVisible(False)
+            form.label_axe2.setVisible(False)
+            form.le_axe1.setVisible(False)
+            form.le_axe2.setVisible(False)
+            form.bt_browse_axe1.setVisible(False)
+            form.bt_browse_axe2.setVisible(False)
             form.plain_status.setPlainText('Measures the area of ​​the triangle formed by the 3 selected alpha carbons. Click on Load.')
 
         elif form.cb_tool.currentText() == "Dihedral angle":
@@ -1133,6 +1283,12 @@ def make_dialog():
             form.cb_res4.setVisible(True)
             form.cb_lig.setVisible(False)
             form.label_lig.setVisible(False)
+            form.label_axe1.setVisible(False)
+            form.label_axe2.setVisible(False)
+            form.le_axe1.setVisible(False)
+            form.le_axe2.setVisible(False)
+            form.bt_browse_axe1.setVisible(False)
+            form.bt_browse_axe2.setVisible(False)
             form.plain_status.setPlainText('Measure the residue carbon alpha dihedral angles. Click on Load.')
 
         elif form.cb_tool.currentText() == "Distance":
@@ -1150,6 +1306,12 @@ def make_dialog():
             form.cb_res4.setVisible(False)
             form.cb_lig.setVisible(False)
             form.label_lig.setVisible(False)
+            form.label_axe1.setVisible(False)
+            form.label_axe2.setVisible(False)
+            form.le_axe1.setVisible(False)
+            form.le_axe2.setVisible(False)
+            form.bt_browse_axe1.setVisible(False)
+            form.bt_browse_axe2.setVisible(False)
             form.plain_status.setPlainText('Measure the residue carbon alpha distance. Click on Load.')
 
         elif form.cb_tool.currentText() == "Ligand Distance":
@@ -1167,6 +1329,12 @@ def make_dialog():
             form.cb_res4.setVisible(False)
             form.cb_lig.setVisible(True)
             form.label_lig.setVisible(True)
+            form.label_axe1.setVisible(False)
+            form.label_axe2.setVisible(False)
+            form.le_axe1.setVisible(False)
+            form.le_axe2.setVisible(False)
+            form.bt_browse_axe1.setVisible(False)
+            form.bt_browse_axe2.setVisible(False)
             form.plain_status.setPlainText('Measure the residue carbon alpha and ligand center of mass distance. Click on Load.')
 
         elif form.cb_tool.currentText() == "Modevectors":
@@ -1184,6 +1352,12 @@ def make_dialog():
             form.cb_res4.setVisible(False)
             form.cb_lig.setVisible(False)
             form.label_lig.setVisible(False)
+            form.label_axe1.setVisible(False)
+            form.label_axe2.setVisible(False)
+            form.le_axe1.setVisible(False)
+            form.le_axe2.setVisible(False)
+            form.bt_browse_axe1.setVisible(False)
+            form.bt_browse_axe2.setVisible(False)
             form.plain_status.setPlainText('Visualize the direction of motion between two specified frames. Click on Load.')
 
         elif form.cb_tool.currentText() == "FEL":
@@ -1201,6 +1375,12 @@ def make_dialog():
             form.cb_res4.setVisible(False)
             form.cb_lig.setVisible(False)
             form.label_lig.setVisible(False)
+            form.label_axe1.setVisible(True)
+            form.label_axe2.setVisible(True)
+            form.le_axe1.setVisible(True)
+            form.le_axe2.setVisible(True)
+            form.bt_browse_axe1.setVisible(True)
+            form.bt_browse_axe2.setVisible(True)
             form.plain_status.setPlainText('FEL represents a mapping of all possible conformations a molecule adopted during a simulation, together with their corresponding energy reported as the Gibbs Free Energy. FEL are represented using two variables that reflect specific properties of the system and measure conformational variability. RG measure the torsion angle around a specific bond or the radius of gyration of the protein, and the the RMSD measure the deviation with respective native state (First frame). Click on Load.')
 
         elif form.cb_tool.currentText() == "PCA":
@@ -1218,6 +1398,12 @@ def make_dialog():
             form.cb_res4.setVisible(False)
             form.cb_lig.setVisible(False)
             form.label_lig.setVisible(False)
+            form.label_axe1.setVisible(False)
+            form.label_axe2.setVisible(False)
+            form.le_axe1.setVisible(False)
+            form.le_axe2.setVisible(False)
+            form.bt_browse_axe1.setVisible(False)
+            form.bt_browse_axe2.setVisible(False)
             form.plain_status.setPlainText('Create ten component PCA model, and project our data down into this reduced dimensional space. Click on Load.')
         
         elif form.cb_tool.currentText() == "PCA_EXP":
@@ -1235,6 +1421,12 @@ def make_dialog():
             form.cb_res4.setVisible(False)
             form.cb_lig.setVisible(False)
             form.label_lig.setVisible(False)
+            form.label_axe1.setVisible(False)
+            form.label_axe2.setVisible(False)
+            form.le_axe1.setVisible(False)
+            form.le_axe2.setVisible(False)
+            form.bt_browse_axe1.setVisible(False)
+            form.bt_browse_axe2.setVisible(False)
             form.plain_status.setPlainText('Gives the PCA variance explained solely by the i+1st dimension. Click on Load.')
 
         else:
@@ -1252,6 +1444,12 @@ def make_dialog():
             form.cb_res4.setVisible(False)
             form.cb_lig.setVisible(False)
             form.label_lig.setVisible(False)
+            form.label_axe1.setVisible(False)
+            form.label_axe2.setVisible(False)
+            form.le_axe1.setVisible(False)
+            form.le_axe2.setVisible(False)
+            form.bt_browse_axe1.setVisible(False)
+            form.bt_browse_axe2.setVisible(False)
             form.plain_status.setPlainText('Ready. Select a tool.')    
     
     
@@ -1352,46 +1550,62 @@ def make_dialog():
 
     def load():
         # get form data
-        form.cb_res1.setEnabled(True)
-        form.cb_res2.setEnabled(True)
-        form.cb_res3.setEnabled(True)
-        form.cb_res4.setEnabled(True)
-        form.cb_chain.setEnabled(True)
-        try:
-            print('Change current name '+str(cmd.get_object_list(selection='(all)'))+' by "md"')
-            obj_name = cmd.get_object_list(selection='(all)')
-            cmd.set_name(obj_name[0], 'md')
-            stored.res=[]
-            cmd.iterate("(name ca)","stored.res.append((resi,resn))")       
-            for item in stored.res:
-                form.cb_res1.addItem(item[1]+'_'+item[0])
-                form.cb_res2.addItem(item[1]+'_'+item[0])
-                form.cb_res3.addItem(item[1]+'_'+item[0])
-                form.cb_res4.addItem(item[1]+'_'+item[0])
+        if len(stored.axe1_data) != 0 and len(stored.axe2_data) != 0:
+            if len(stored.axe1_data) != 0 and len(stored.axe2_data) != 0:
+                form.bt_load.setVisible(False)
+                form.bt_run.setVisible(True)
+                form.bt_browse_axe1.setEnabled(False)
+                form.bt_browse_axe2.setEnabled(False)
+                form.le_axe1.setEnabled(False)
+                form.le_axe2.setEnabled(False)
+                form.plain_status.setPlainText('Using CSV files. Click on Run')
+            else:
+                showdialog('Note','The number of frames must be equal for both CSV files.')
+        else:
+            form.cb_res1.setEnabled(True)
+            form.cb_res2.setEnabled(True)
+            form.cb_res3.setEnabled(True)
+            form.cb_res4.setEnabled(True)
+            form.cb_chain.setEnabled(True)
+            form.bt_browse_axe1.setEnabled(False)
+            form.bt_browse_axe2.setEnabled(False)
+            form.le_axe1.setEnabled(False)
+            form.le_axe2.setEnabled(False)
+            try:
+                print('Change current name '+str(cmd.get_object_list(selection='(all)'))+' by "md"')
+                obj_name = cmd.get_object_list(selection='(all)')
+                cmd.set_name(obj_name[0], 'md')
+                stored.res=[]
+                cmd.iterate("(name ca)","stored.res.append((resi,resn))")       
+                for item in stored.res:
+                    form.cb_res1.addItem(item[1]+'_'+item[0])
+                    form.cb_res2.addItem(item[1]+'_'+item[0])
+                    form.cb_res3.addItem(item[1]+'_'+item[0])
+                    form.cb_res4.addItem(item[1]+'_'+item[0])
 
-            stored.lig=[]
-            cmd.iterate("(organic)","stored.lig.append((resi,resn))")       
-            for item in remove_rep(stored.lig):
-                form.cb_lig.addItem(item[1]+'_'+item[0])
-            stored.ch=[]    
-            for ch in cmd.get_chains('md'):
-            	stored.ch.append(ch)
-            for item in remove_rep(stored.ch):
-                form.cb_chain.addItem(item)
-            form.sb_frame_init.setMinimum(1)
-            form.sb_frame_init.setMaximum(cmd.count_states('md')-1)
-            form.sb_frame_init.setValue(1)
-            form.sb_frame_final.setMinimum(1)
-            form.sb_frame_final.setMaximum(cmd.count_states('md')-1)
-            form.sb_frame_final.setValue(cmd.count_states('md'))
-            form.bt_set.setVisible(True)
-            form.bt_load.setVisible(False)
-            form.cb_tool.setEnabled(False)
-            form.sb_frame_init.setEnabled(True)
-            form.sb_frame_final.setEnabled(True)
-            
-        except:
-            showdialog('Note',"Invalid trajectory loaded")
+                stored.lig=[]
+                cmd.iterate("(organic)","stored.lig.append((resi,resn))")       
+                for item in remove_rep(stored.lig):
+                    form.cb_lig.addItem(item[1]+'_'+item[0])
+                stored.ch=[]    
+                for ch in cmd.get_chains('md'):
+                	stored.ch.append(ch)
+                for item in remove_rep(stored.ch):
+                    form.cb_chain.addItem(item)
+                form.sb_frame_init.setMinimum(1)
+                form.sb_frame_init.setMaximum(cmd.count_states('md')-1)
+                form.sb_frame_init.setValue(1)
+                form.sb_frame_final.setMinimum(1)
+                form.sb_frame_final.setMaximum(cmd.count_states('md')-1)
+                form.sb_frame_final.setValue(cmd.count_states('md'))
+                form.bt_set.setVisible(True)
+                form.bt_load.setVisible(False)
+                form.cb_tool.setEnabled(False)
+                form.sb_frame_init.setEnabled(True)
+                form.sb_frame_final.setEnabled(True)
+                
+            except:
+                showdialog('Note',"Invalid trajectory loaded")
 
 
     
@@ -1482,8 +1696,9 @@ def make_dialog():
 
             fig, (ax1) = plt.subplots(nrows=1)            
             # Setting data
-            x = df['RMSD (nm)']
-            y = df['RG (nm)']
+            c_name = df.columns.tolist()
+            x = df[str(c_name[-2])]
+            y = df[str(c_name[-1])]
 
             # Calculate the point density
             xy = np.vstack([x,y])
@@ -1497,7 +1712,7 @@ def make_dialog():
             pdf = ax1.scatter(x, y, c = z, s = 50, edgecolor = '', cmap=plt.cm.jet)
 
             # Plot title
-            ax1.set_title('RMSD by RG')
+            ax1.set_title(str(c_name[-1])+' by '+str(c_name[-2]))
 
             # Hide right and top spines
             ax1.spines['right'].set_visible(False)
@@ -1506,16 +1721,16 @@ def make_dialog():
             ax1.xaxis.set_ticks_position('bottom')
 
             # Set x and y limits
-            xmin = df['RMSD (nm)'].min() - 1
-            xmax = df['RMSD (nm)'].max() + 1
-            ymin = df['RG (nm)'].min() - 1
-            ymax = df['RG (nm)'].max() + 1        
+            xmin = x.min() - 1
+            xmax = x.max() + 1
+            ymin = y.min() - 1
+            ymax = y.max() + 1        
             plt.xlim(xmin, xmax)
             plt.ylim(ymin, ymax)
 
             # Set x and y labels
-            plt.xlabel('RMSD (nm)')
-            plt.ylabel('RG (nm)')
+            plt.xlabel(str(c_name[-1]))
+            plt.ylabel(str(c_name[-2]))
 
             # Adding the color bar 
             colbar = plt.colorbar(pdf)
@@ -1544,31 +1759,33 @@ def make_dialog():
                 fig = plt.figure(figsize=(15,10))
                 fig.suptitle('Free Energy Landscape', fontsize=20)
                 ax = fig.gca(projection='3d')
-                ax.set_xlabel('RMSD (nm)', fontsize=15)
-                ax.set_ylabel('RG (nm)', fontsize=15)
+                c_name = df.columns.tolist()
+                ax.set_xlabel(str(c_name[-3]), fontsize=15)
+                ax.set_ylabel(str(c_name[-2]), fontsize=15)
                 ax.set_zlabel('Gibbs Free Energy (kj/mol)', fontsize=15)
                 ax = fig.gca(projection='3d')
-                ax.plot_trisurf(df['RMSD (nm)'], df['RG (nm)'], df['Gb_E (kj/mol)'], cmap=plt.cm.jet, linewidth=0, antialiased=False)
+                ax.plot_trisurf(df[str(c_name[-3])], df[str(c_name[-2])], df['Gb_E (kj/mol)'], cmap=plt.cm.jet, linewidth=0, antialiased=False)
                     
                 # to Add a color bar which maps values to colors.
-                surf=ax.plot_trisurf(df['RMSD (nm)'], df['RG (nm)'], df['Gb_E (kj/mol)'], cmap=plt.cm.jet, linewidth=0, antialiased=False)
+                surf=ax.plot_trisurf(df[str(c_name[-3])], df[str(c_name[-2])], df['Gb_E (kj/mol)'], cmap=plt.cm.jet, linewidth=0, antialiased=False)
                 colbar = fig.colorbar( surf, shrink=0.5, aspect=5)
                 colbar.set_label('Gibbs Free Energy (kj/mol)')
-                ax.tricontourf(df['RMSD (nm)'], df['RG (nm)'], df['Gb_E (kj/mol)'], zdir='z', offset=-1, cmap=plt.cm.jet)
+                ax.tricontourf(df[str(c_name[-3])], df[str(c_name[-2])], df['Gb_E (kj/mol)'], zdir='z', offset=-1, cmap=plt.cm.jet)
                     
                 # Rotate it
                 ax.view_init(30, 15)
                 plt.show()
             else:
                 df = pd.read_csv(TEMP_PATH+'/dataFEL.csv')
+                c_name = df.columns.tolist()
                 z = df['Gb_E (kj/mol)']
-                X = df['RMSD (nm)']
-                Y = df['RG (nm)']
+                X = df[str(c_name[-1])]
+                Y = df[str(c_name[-2])]
                 fig, ax = plt.subplots()
                 fig.suptitle('Free Energy Landscape', fontsize=20)
-                trico = ax.tricontourf(df['RMSD (nm)'], df['RG (nm)'], df['Gb_E (kj/mol)'], zdir='z', offset=-1, cmap=plt.cm.jet)
-                ax.set_xlabel('RMSD (nm)', fontsize=15)
-                ax.set_ylabel('RG (nm)', fontsize=15)
+                trico = ax.tricontourf(df[str(c_name[-3])], df[str(c_name[-2])], df['Gb_E (kj/mol)'], zdir='z', offset=-1, cmap=plt.cm.jet)
+                ax.set_xlabel(str(c_name[-3]), fontsize=15)
+                ax.set_ylabel(str(c_name[-2]), fontsize=15)
                 colbar = fig.colorbar(trico, shrink=0.5, aspect=5)
                 colbar.set_label('Gibbs Free Energy (kj/mol)')
                 plt.show()
@@ -1641,6 +1858,10 @@ def make_dialog():
     form.bt_plot.clicked.connect(plottingData)
     form.bt_getcsv.clicked.connect(save_csv)
     form.bt_clear.clicked.connect(clear)
+    form.bt_browse_axe1.clicked.connect(openCSVfileAxe1)
+    form.bt_browse_axe2.clicked.connect(openCSVfileAxe2)
+    form.le_axe1.setReadOnly(True)
+    form.le_axe2.setReadOnly(True)
     form.cb_tool.addItem("Pincer angle")
     form.cb_tool.addItem("Dihedral angle")
     form.cb_tool.addItem("Triangle area")

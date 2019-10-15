@@ -178,7 +178,7 @@
         <x>0</x>
         <y>0</y>
         <width>820</width>
-        <height>182</height>
+        <height>150</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
@@ -195,23 +195,6 @@
       <string>Analysis </string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_tool">
-        <property name="text">
-         <string> Tool:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="cb_tool"/>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="label_plot">
-        <property name="text">
-         <string>Plot:</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="3">
        <widget class="QComboBox" name="cb_selplot"/>
       </item>
@@ -222,8 +205,15 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="5">
-       <widget class="QSpinBox" name="sb_1pc"/>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cb_tool"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_tool">
+        <property name="text">
+         <string> Tool:</string>
+        </property>
+       </widget>
       </item>
       <item row="0" column="6">
        <widget class="QLabel" name="label_x">
@@ -232,9 +222,6 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="7">
-       <widget class="QSpinBox" name="sb_2pc"/>
-      </item>
       <item row="0" column="8">
        <widget class="QLabel" name="label_frame1">
         <property name="text">
@@ -242,8 +229,11 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="9">
-       <widget class="QSpinBox" name="sb_frame_init"/>
+      <item row="0" column="7">
+       <widget class="QSpinBox" name="sb_2pc"/>
+      </item>
+      <item row="0" column="5">
+       <widget class="QSpinBox" name="sb_1pc"/>
       </item>
       <item row="1" column="8">
        <widget class="QLabel" name="label_frame2">
@@ -252,8 +242,52 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="9">
+       <widget class="QSpinBox" name="sb_frame_init"/>
+      </item>
       <item row="1" column="9">
        <widget class="QSpinBox" name="sb_frame_final"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="label_plot">
+        <property name="text">
+         <string>Plot:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_axe1">
+        <property name="text">
+         <string>Axe 1:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="le_axe1"/>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="bt_browse_axe1">
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_axe2">
+        <property name="text">
+         <string>Axe 2:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="le_axe2"/>
+      </item>
+      <item row="2" column="2">
+       <widget class="QPushButton" name="bt_browse_axe2">
+        <property name="text">
+         <string>Browse</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
