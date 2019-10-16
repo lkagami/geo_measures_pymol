@@ -488,6 +488,7 @@ def make_dialog():
         form.bt_browse_axe2.setEnabled(True)
         form.le_axe1.setEnabled(True)
         form.le_axe2.setEnabled(True)
+        form.cb_lig.setEnabled(True)
         form.plain_status.setPlainText('Ready')
         stored.axe_frame = []
         stored.axe1_column_name = []
