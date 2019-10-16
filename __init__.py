@@ -488,6 +488,7 @@ def make_dialog():
         form.bt_browse_axe2.setEnabled(True)
         form.le_axe1.setEnabled(True)
         form.le_axe2.setEnabled(True)
+        form.plain_status.setPlainText('Ready')
         stored.axe_frame = []
         stored.axe1_column_name = []
         stored.axe1_data= []
@@ -1078,6 +1079,7 @@ def make_dialog():
         form.cb_chain.setEnabled(False)
         form.sb_frame_init.setEnabled(False)
         form.sb_frame_final.setEnabled(False)
+        form.cb_lig.setEnabled(False)
         form.plain_status.setPlainText('Read. Click on Run.')
 
           
@@ -1547,6 +1549,7 @@ def make_dialog():
         form.cb_chain.setEnabled(True)
         form.sb_frame_init.setEnabled(True)
         form.sb_frame_final.setEnabled(True)
+        form.cb_lig.setEnabled(True)
 
     def load():
         # get form data
