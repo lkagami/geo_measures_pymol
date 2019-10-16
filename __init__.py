@@ -1337,6 +1337,7 @@ def make_dialog():
             form.le_axe2.setVisible(False)
             form.bt_browse_axe1.setVisible(False)
             form.bt_browse_axe2.setVisible(False)
+            form.cb_lig.setEnabled(True)
             form.plain_status.setPlainText('Measure the residue carbon alpha and ligand center of mass distance. Click on Load.')
 
         elif form.cb_tool.currentText() == "Modevectors":
