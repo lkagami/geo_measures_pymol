@@ -1664,10 +1664,10 @@ def make_dialog():
             option='PDF'
             data = TEMP_PATH+'/dataPDF.csv'
         elif form.cb_tool.currentText() == "RMSD":
-            option='RMSD'
+            option='RMSD (nm)'
             data = TEMP_PATH+'/dataRMSD.csv'
         elif form.cb_tool.currentText() == "RG":
-            option = 'RG'
+            option = 'RG (nm)'
             data = TEMP_PATH+'/dataRG.csv'
         elif form.cb_tool.currentText() == "FEL":
             option='FEL'
@@ -1737,7 +1737,7 @@ def make_dialog():
             colbar.set_label('Probability Density Function')     
             plt.show()
 
-        elif option == 'RG' or option == 'RMSD' or option == 'Angle' or option == 'Dihedral' or option == 'Area':
+        elif option == 'RG (nm)' or option == 'RMSD (nm)' or option == 'Angle' or option == 'Dihedral' or option == 'Area':
             df = pd.read_csv(data)
             fig, (ax1) = plt.subplots(nrows=1)
             ax1.plot(df['Frame'], df[option])
