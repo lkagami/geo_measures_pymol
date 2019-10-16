@@ -467,6 +467,7 @@ def make_dialog():
         form.cb_res3.clear()
         form.cb_res4.clear()
         form.cb_chain.clear()
+        form.cb_lig.clear()
         stored.axe1_data.clear()
         stored.axe2_data.clear()
         form.le_axe1.clear()
