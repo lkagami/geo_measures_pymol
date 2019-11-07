@@ -1109,7 +1109,7 @@ def make_dialog():
             form.le_axe2.setVisible(True)
             form.bt_browse_axe1.setVisible(True)
             form.bt_browse_axe2.setVisible(True)
-            form.plain_status.setPlainText('The Functional Density Function is calculated using different values ​​of mainchain dihedral angles from the considered residue, the mainchain conformation of the equivalent residue between frames. Click on Load.')
+            form.plain_status.setPlainText('The Probability Density Function is calculated using different values ​​of mainchain dihedral angles from the considered residue, the mainchain conformation of the equivalent residue between frames. Click on Load.')
 
         elif form.cb_tool.currentText() == "RG":
             form.label_frame1.setVisible(False)
