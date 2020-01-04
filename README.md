@@ -7,7 +7,7 @@ https://pymolwiki.org/index.php/Geo_Measures_Plugin
 
 PyMOL version higher than 2.0.
 
-It is highly recommended to install PyMOL using the Ananconda3 package [1].
+It is highly recommended to install PyMOL using the [Ananconda3 package](https://www.anaconda.com/distribution/).
 
 You need to install python packages.
 
