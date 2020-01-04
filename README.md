@@ -16,7 +16,8 @@ To do this use the command:
 pip install pandas matplotlib scipy mdtraj sklearn
 
 ## Installation:
-Install geo_measures_pymol-master.zip using the PyMOL Plugin Manager
+
+Install [geo_measures_pymol-master.zip](https://github.com/lkagami/geo_measures_pymol/archive/master.zip) using the PyMOL Plugin Manager
 
 ### Author(s)	Luciano Porto Kagami, Gustavo Machado das Neves, Luís Fernando Saraiva Macedo Timmers, Rafael Andrade Cáceres, Vera Lucia Eifler-Lima
 ### License	GNU General Public License v3.0
