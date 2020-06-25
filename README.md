@@ -21,3 +21,7 @@ Install [geo_measures_pymol-master.zip](https://github.com/lkagami/geo_measures_
 
 #### Author(s):	Luciano Porto Kagami, Gustavo Machado das Neves, Rafael Andrade Cáceres, Vera Lucia Eifler-Lima and Luís Fernando Saraiva Macedo Timmers
 #### License:	GNU General Public License v3.0
+
+Please cite us:
+Kagami LP, das Neves GM, Timmers LFSM, Caceres RA,Eifler-Lima VL, Geo-Measures: A PyMOL plugin for protein structure ensembles analysis,Computational Biology and Chemistry(2020)
+doi.org/10.1016/j.compbiolchem.2020.107322
