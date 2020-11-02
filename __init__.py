@@ -1715,7 +1715,7 @@ def make_dialog():
             x, y, z = x[idx], y[idx], z[idx]
 
             # Setting plot type 
-            pdf = ax1.scatter(x, y, c = z, s = 50, edgecolor = '', cmap=plt.cm.jet)
+            pdf = ax1.scatter(x, y, c = z, s = 50, edgecolor = 'none', cmap=plt.cm.jet)
 
             # Plot title
             ax1.set_title(str(c_name[-1])+' by '+str(c_name[-2]))
