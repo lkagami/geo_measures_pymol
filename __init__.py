@@ -1648,7 +1648,11 @@ def make_dialog():
                 data = TEMP_PATH+'/dataDist.csv'
             elif form.cb_tool.currentText() =="Ligand Distance":
                 data = TEMP_PATH+'/dataLigDist.csv'
-            df = pd.read_csv(data[0])
+            try:
+                df = pd.read_csv(data)
+            except:
+                df = pd.read_csv(data[0])
+                
             if fileName.endswith('.csv'):
                 df.to_csv(fileName)
             else:
