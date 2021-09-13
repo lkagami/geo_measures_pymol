@@ -346,7 +346,7 @@ def make_dialog():
     from pymol.Qt.utils import getSaveFileNameWithExt
     cmd.bg_color("white")
     cmd.remove('solvent')
-    
+
     def showdialog(msgtitle,msgtxt):
         mb = QtWidgets.QMessageBox()
         mb.setIcon(QtWidgets.QMessageBox.Information)
@@ -355,14 +355,14 @@ def make_dialog():
         mb.setStandardButtons(QtWidgets.QMessageBox.Ok)
         mb.exec_()
     try:
-        import pandas as pd        
+        import pandas as pd
         import matplotlib
         import matplotlib.pyplot as plt
         from scipy.stats import gaussian_kde
-        from mpl_toolkits.mplot3d import Axes3D        
+        from mpl_toolkits.mplot3d import Axes3D
         import mdtraj
         from sklearn.decomposition import PCA
-        
+
     except:
     	showdialog('Note', 'Please install python library requeriments: pandas, matplotlib, scipy, mdtraj, sklearn')
 
@@ -373,7 +373,7 @@ def make_dialog():
     uifile = os.path.join(os.path.dirname(__file__), 'geo.ui')
     form = loadUi(uifile, dialog)
     form.progressBar.setProperty("value", 0)
-    
+
     # callback for the "Ray" button
     stored.axe_frame = []
     stored.axe1_column_name = []
@@ -406,11 +406,11 @@ def make_dialog():
             for itens in df.columns.tolist():
                 stored.axe2_column_name.append(itens)
             for itens in df.iloc[:,-1]:
-                stored.axe2_data.append(itens)            
+                stored.axe2_data.append(itens)
         else:
             return None
 
-    def setupProcess():        
+    def setupProcess():
         # Run the process with a given command
         form.plain_status.setPlainText("Please wait.. Sham is running..")
         os.chdir(TEMP_PATH)
@@ -455,7 +455,7 @@ def make_dialog():
             labels = ['RMSD (nm)', 'RG (nm)', 'Gb_E (kj/mol)']
         df = pd.DataFrame.from_records(data, columns=labels)
         os.chdir(TEMP_PATH)
-        df.to_csv('dataFEL.csv')   
+        df.to_csv('dataFEL.csv')
 
     def clear():
         try:
@@ -538,8 +538,8 @@ def make_dialog():
             for frame in range(cmd.count_states('md')):
                 distAB = cmd.distance(None,"res1","res2", state=frame)
                 distAC = cmd.distance(None,"res1","res3", state=frame)
-                distBC = cmd.distance(None,"res2","res3", state=frame)                        
-                sPerimeter = (distAB + distAC + distBC) / 2                        
+                distBC = cmd.distance(None,"res2","res3", state=frame)
+                sPerimeter = (distAB + distAC + distBC) / 2
                 area = (sPerimeter*(sPerimeter-distAB)*(sPerimeter-distAC)*(sPerimeter-distBC)) ** 0.5
                 dataArea.append(area)
                 dataFrame.append(frame)
@@ -587,7 +587,7 @@ def make_dialog():
             form.progressBar.setMaximum(cmd.count_states('md'))
             t = mdtraj.load(TRAJ_PATH)
             rmsd = mdtraj.rmsd(t, t, 1)
-            for frame in range(cmd.count_states('md')):                
+            for frame in range(cmd.count_states('md')):
                 dataRMSD.append(rmsd[frame])
                 dataFrame.append(frame)
                 count += 1
@@ -745,7 +745,7 @@ def make_dialog():
             form.plain_status.setPlainText('Running PCA_EXP, please wait.')
             pc = [0,1,2,3,4,5,6,7,8,9]
             PC = []
-            stored.dataPC_exp = []            
+            stored.dataPC_exp = []
             traj = mdtraj.load(TRAJ_PATH)
             pca1 = PCA(n_components=10)
             traj.superpose(traj, 0)
@@ -854,7 +854,7 @@ def make_dialog():
             form.bt_plot.setVisible(False)
             form.bt_getcsv.setVisible(True)
             form.bt_clear.setVisible(True)
-            form.plain_status.setPlainText('Done.')            
+            form.plain_status.setPlainText('Done.')
         elif form.cb_tool.currentText() == "Distance":
             form.plain_status.setPlainText('Running Distance, please wait.')
             distData = []
@@ -886,7 +886,7 @@ def make_dialog():
             form.progressBar.setMaximum(frame_final-frame_init)
             for frame in range(frame_final-frame_init):
                 count += 1
-                form.progressBar.setValue(count)            
+                form.progressBar.setValue(count)
             modevectors(first_obj_frame='md',last_obj_frame ='md', first_state=frame_init, last_state=frame_final)
             cmd.create('frame_init','md',source_state=frame_init,target_state=frame_init)
             cmd.create('frame_final','md',source_state=frame_final,target_state=frame_final)
@@ -970,7 +970,7 @@ def make_dialog():
                         dataRMSD.append(rmsd[frame])
                         dataRG.append(rg[frame])
                         count += 1
-                        form.progressBar.setValue(count)                      
+                        form.progressBar.setValue(count)
                     os.chdir(TEMP_PATH)
                     g_data =  pd.DataFrame()
                     g_data['a'] = dataFrame
@@ -990,7 +990,7 @@ def make_dialog():
                     form.bt_clear.setVisible(True)
                     form.cb_selplot.setVisible(True)
                     form.label_plot.setVisible(True)
-                    form.plain_status.setPlainText('Done.')                  
+                    form.plain_status.setPlainText('Done.')
             else:
                 showdialog('Notice', 'GROMACS program must be intalled')
                 clear()
@@ -1056,7 +1056,7 @@ def make_dialog():
             cmd.color('yellow', 'md')
         elif form.cb_tool.currentText() =="RMSF":
             cmd.color('yellow', 'md')
-            cmd.save(TRAJ_PATH, 'n. CA', state=0)        
+            cmd.save(TRAJ_PATH, 'n. CA', state=0)
         elif form.cb_tool.currentText() =="Distance":
             cmd.select('res1','/md//{0}/{1}/CA'.format(chain,num1[1]))
             cmd.select('res2','/md//{0}/{1}/CA'.format(chain,num2[1]))
@@ -1064,7 +1064,7 @@ def make_dialog():
             cmd.show_as('licorice', 'res1')
             cmd.color('yellow', 'res1 and res2')
             cmd.zoom('res2')
-        elif form.cb_tool.currentText() =="Ligand Distance":            
+        elif form.cb_tool.currentText() =="Ligand Distance":
             cmd.select('ligand','resi {}'.format(lig_num[1]))
             cmd.select('res1','/md//{0}/{1}/CA'.format(chain,num1[1]))
             cmd.show_as('cartoon')
@@ -1084,10 +1084,10 @@ def make_dialog():
         form.cb_lig.setEnabled(False)
         form.plain_status.setPlainText('Read. Click on Run.')
 
-          
-    
+
+
     def res_hide():
-        
+
         if form.cb_tool.currentText() == "PDF":
             form.label_frame1.setVisible(False)
             form.label_frame2.setVisible(False)
@@ -1410,7 +1410,7 @@ def make_dialog():
             form.bt_browse_axe1.setVisible(False)
             form.bt_browse_axe2.setVisible(False)
             form.plain_status.setPlainText('Create ten component PCA model, and project our data down into this reduced dimensional space. Click on Load.')
-        
+
         elif form.cb_tool.currentText() == "PCA_EXP":
             form.label_frame1.setVisible(False)
             form.label_frame2.setVisible(False)
@@ -1455,9 +1455,9 @@ def make_dialog():
             form.le_axe2.setVisible(False)
             form.bt_browse_axe1.setVisible(False)
             form.bt_browse_axe2.setVisible(False)
-            form.plain_status.setPlainText('Ready. Select a tool.')    
-    
-    
+            form.plain_status.setPlainText('Ready. Select a tool.')
+
+
     def remove_rep(List):
         l = []
         for i in List:
@@ -1535,11 +1535,11 @@ def make_dialog():
             try:
                 shutil.rmtree(TRAJ_PATH)
             except:
-                None        
+                None
         elif form.cb_tool.currentText() =="Distance":
             cmd.delete('res1 and res2')
             cmd.color('green', 'md')
-        elif form.cb_tool.currentText() =="Ligand Distance":            
+        elif form.cb_tool.currentText() =="Ligand Distance":
             cmd.delete('res1 and ligand')
             cmd.color('green', 'md')
         form.bt_run.setVisible(False)
@@ -1582,7 +1582,7 @@ def make_dialog():
                 obj_name = cmd.get_object_list(selection='(all)')
                 cmd.set_name(obj_name[0], 'md')
                 stored.res=[]
-                cmd.iterate("(name ca)","stored.res.append((resi,resn))")       
+                cmd.iterate("(name ca)","stored.res.append((resi,resn))")
                 for item in stored.res:
                     form.cb_res1.addItem(item[1]+'_'+item[0])
                     form.cb_res2.addItem(item[1]+'_'+item[0])
@@ -1590,10 +1590,10 @@ def make_dialog():
                     form.cb_res4.addItem(item[1]+'_'+item[0])
 
                 stored.lig=[]
-                cmd.iterate("(organic)","stored.lig.append((resi,resn))")       
+                cmd.iterate("(organic)","stored.lig.append((resi,resn))")
                 for item in remove_rep(stored.lig):
                     form.cb_lig.addItem(item[1]+'_'+item[0])
-                stored.ch=[]    
+                stored.ch=[]
                 for ch in cmd.get_chains('md'):
                 	stored.ch.append(ch)
                 for item in remove_rep(stored.ch):
@@ -1609,12 +1609,12 @@ def make_dialog():
                 form.cb_tool.setEnabled(False)
                 form.sb_frame_init.setEnabled(True)
                 form.sb_frame_final.setEnabled(True)
-                
+
             except:
                 showdialog('Note',"Invalid trajectory loaded")
 
 
-    
+
     def save_csv():
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.DontUseNativeDialog
@@ -1643,12 +1643,12 @@ def make_dialog():
             elif form.cb_tool.currentText() =="DSSP":
                 data = TEMP_PATH+'/dataDSSP.csv'
             elif form.cb_tool.currentText() =="RMSF":
-                data = TEMP_PATH+'/dataRMSF.csv'        
+                data = TEMP_PATH+'/dataRMSF.csv'
             elif form.cb_tool.currentText() =="Distance":
                 data = TEMP_PATH+'/dataDist.csv'
             elif form.cb_tool.currentText() =="Ligand Distance":
                 data = TEMP_PATH+'/dataLigDist.csv'
-            df = pd.read_csv(data)
+            df = pd.read_csv(data[0])
             if fileName.endswith('.csv'):
                 df.to_csv(fileName)
             else:
@@ -1689,7 +1689,7 @@ def make_dialog():
             data = TEMP_PATH+'/dataRAMA.csv'
         elif form.cb_tool.currentText() =="RMSF":
             option="RMSF"
-            data = TEMP_PATH+'/dataRMSF.csv'        
+            data = TEMP_PATH+'/dataRMSF.csv'
         elif form.cb_tool.currentText() =="Distance":
             option="Distance"
             data = TEMP_PATH+'/dataDist.csv'
@@ -1700,7 +1700,7 @@ def make_dialog():
         if option == 'PDF':
             df = pd.read_csv(data)
 
-            fig, (ax1) = plt.subplots(nrows=1)            
+            fig, (ax1) = plt.subplots(nrows=1)
             # Setting data
             c_name = df.columns.tolist()
             x = df[str(c_name[-2])]
@@ -1714,7 +1714,7 @@ def make_dialog():
             idx = z.argsort()
             x, y, z = x[idx], y[idx], z[idx]
 
-            # Setting plot type 
+            # Setting plot type
             pdf = ax1.scatter(x, y, c = z, s = 50, edgecolor = 'none', cmap=plt.cm.jet)
 
             # Plot title
@@ -1730,7 +1730,7 @@ def make_dialog():
             xmin = x.min() - 1
             xmax = x.max() + 1
             ymin = y.min() - 1
-            ymax = y.max() + 1        
+            ymax = y.max() + 1
             plt.xlim(xmin, xmax)
             plt.ylim(ymin, ymax)
 
@@ -1738,9 +1738,9 @@ def make_dialog():
             plt.xlabel(str(c_name[-1]))
             plt.ylabel(str(c_name[-2]))
 
-            # Adding the color bar 
+            # Adding the color bar
             colbar = plt.colorbar(pdf)
-            colbar.set_label('Probability Density Function')     
+            colbar.set_label('Probability Density Function')
             plt.show()
 
         elif option == 'RG (nm)' or option == 'RMSD (nm)' or option == 'Angle' or option == 'Dihedral' or option == 'Area':
@@ -1756,9 +1756,9 @@ def make_dialog():
             xmin1 = df['Frame'].min() - 1
             xmax1 = df['Frame'].max() + 1
             plt.xlim(xmin1, xmax1)
-            plt.ylabel(option)        
+            plt.ylabel(option)
             plt.show()
-        
+
         elif option == 'FEL':
             if form.cb_selplot.currentText() == "3D":
                 df = pd.read_csv(TEMP_PATH+'/dataFEL.csv')
@@ -1771,13 +1771,13 @@ def make_dialog():
                 ax.set_zlabel('Gibbs Free Energy (kj/mol)', fontsize=15)
                 ax = fig.gca(projection='3d')
                 ax.plot_trisurf(df[str(c_name[-3])], df[str(c_name[-2])], df['Gb_E (kj/mol)'], cmap=plt.cm.jet, linewidth=0, antialiased=False)
-                    
+
                 # to Add a color bar which maps values to colors.
                 surf=ax.plot_trisurf(df[str(c_name[-3])], df[str(c_name[-2])], df['Gb_E (kj/mol)'], cmap=plt.cm.jet, linewidth=0, antialiased=False)
                 colbar = fig.colorbar( surf, shrink=0.5, aspect=5)
                 colbar.set_label('Gibbs Free Energy (kj/mol)')
                 ax.tricontourf(df[str(c_name[-3])], df[str(c_name[-2])], df['Gb_E (kj/mol)'], zdir='z', offset=-1, cmap=plt.cm.jet)
-                    
+
                 # Rotate it
                 ax.view_init(30, 15)
                 plt.show()
@@ -1839,7 +1839,7 @@ def make_dialog():
             ax1.set_xticks(x[::100])
             ax1.set_xticklabels(x[::100], rotation='vertical')
             plt.xlabel('Residue Index')
-            plt.ylabel('RMSF')        
+            plt.ylabel('RMSF')
             plt.show()
         elif option == 'Distance' or option == 'Ligand Distance':
             df = pd.read_csv(data)
@@ -1852,9 +1852,9 @@ def make_dialog():
             ax1.set_xticks(x[::100])
             ax1.set_xticklabels(x[::100], rotation='vertical')
             plt.xlabel('Frame')
-            plt.ylabel('Distance')        
+            plt.ylabel('Distance')
             plt.show()
-        
+
 
     form.cb_tool.currentIndexChanged.connect(res_hide)
     form.bt_load.clicked.connect(load)
