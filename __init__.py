@@ -1,5 +1,5 @@
 '''
-G_Measures v.0.8
+G_Measures v.0.9
 The "Geometric Measures" script that was developed to carry out geometric analysis on protein structures.
 
 Contributors:
@@ -32,7 +32,7 @@ import numpy as np
 TEMP_PATH = tempfile.mkdtemp()
 SHAM_PATH = TEMP_PATH+"/g_sham2.xvg"
 TRAJ_PATH = TEMP_PATH+"/trajectory.pdb"
-_version_ = str("v.0.8")
+_version_ = str("v.0.9")
 
 def modevectors(first_obj_frame, last_obj_frame, first_state=1, last_state=1, outname="modevectors", head=1.0, tail=0.3, head_length=1.5, headrgb="1.0,1.0,1.0", tailrgb="1.0,1.0,1.0", cutoff=4.0, skip=0, cut=0.5, atom="CA", stat="show", factor=1.0, notail=0):
     """
@@ -319,7 +319,7 @@ def __init_plugin__(app=None):
     Add an entry to the PyMOL "Plugin" menu
     '''
     from pymol.plugins import addmenuitemqt
-    addmenuitemqt('G_Measure v.0.8', run_plugin_gui)
+    addmenuitemqt('G_Measure v.0.9', run_plugin_gui)
 
 
 # global reference to avoid garbage collection of our dialog
