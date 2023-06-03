@@ -1,5 +1,5 @@
 """
-G_Measures v.0.9c
+G_Measures v.0.9d
 The "Geometric Measures" script that was developed to carry out geometric analysis on protein structures.
 
 Contributors:
@@ -30,7 +30,7 @@ import numpy as np
 TEMP_PATH = tempfile.mkdtemp()
 SHAM_PATH = TEMP_PATH + "/g_sham2.xvg"
 TRAJ_PATH = TEMP_PATH + "/trajectory.pdb"
-_version_ = str("v.0.9c")
+_version_ = str("v.0.9d")
 
 
 def modevectors(
@@ -417,7 +417,7 @@ def __init_plugin__(app=None):
     """
     from pymol.plugins import addmenuitemqt
 
-    addmenuitemqt("G_Measure v.0.9c", run_plugin_gui)
+    addmenuitemqt("G_Measure v.0.9d", run_plugin_gui)
 
 
 # global reference to avoid garbage collection of our dialog
@@ -1976,12 +1976,11 @@ def make_dialog():
                 df = pd.read_csv(TEMP_PATH + "/dataFEL.csv")
                 fig = plt.figure(figsize=(15, 10))
                 fig.suptitle("Free Energy Landscape", fontsize=20)
-                ax = Axes3D(fig)
+                ax = fig.add_subplot(projection="3d")
                 c_name = df.columns.tolist()
                 ax.set_xlabel(str(c_name[-3]), fontsize=15)
                 ax.set_ylabel(str(c_name[-2]), fontsize=15)
                 ax.set_zlabel("Gibbs Free Energy (kj/mol)", fontsize=15)
-                ax = Axes3D(fig)
                 ax.plot_trisurf(
                     df[str(c_name[-3])],
                     df[str(c_name[-2])],
